@@ -98,11 +98,15 @@ module.exports = class LevelSession extends CocoModel
     Backbone.Mediator.publish 'level:top-scores-updated', scores: @getTopScores level
 
   getTopScores: (level=undefined) ->
-    scores = (_.clone(score) for score in @get('state')?.topScores ? [])
+    return LevelSession.getTopScores({level: level?.toJSON(), session: @toJSON()})
+    
+  @getTopScores: ({level, session}) ->
+    Level = require('models/Level')
+    scores = (_.clone(score) for score in session.state?.topScores ? [])
     score.score *= -1 for score in scores when score.type in LevelConstants.lowerIsBetterScoreTypes  # Undo negative storage for display
     if level
       for sessionScore in scores
-        thresholdAchieved = level.thresholdForScore sessionScore
+        thresholdAchieved = Level.thresholdForScore(_.assign(_.pick(sessionScore, 'score', 'type'), {level}))
         if thresholdAchieved
           sessionScore.thresholdAchieved = thresholdAchieved
     scores

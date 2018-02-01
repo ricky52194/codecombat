@@ -4,13 +4,16 @@ FlatLayout = require 'core/components/FlatLayout'
 api = require 'core/api'
 User = require 'models/User'
 Level = require 'models/Level'
+LevelSession = require 'models/LevelSession'
 utils = require 'core/utils'
+StudentAssessmentRow = require('./StudentAssessmentRow').default
 
 StudentAssessmentsComponent = Vue.extend
   name: 'student-assessments-component'
   template: require('templates/courses/student-assessments-view')()
   components:
-    'flat-layout': FlatLayout
+    'flat-layout': FlatLayout,
+    'student-assessment-row': StudentAssessmentRow
   props:
     classroomID:
       type: String
@@ -47,14 +50,20 @@ StudentAssessmentsComponent = Vue.extend
           assessmentLevels: _.filter(course.levels, 'assessment')
         })
         @courses = @classroom.courses
-        _.forEach(@levels, (level) =>
+        return Promise.all(_.map(@levels, (level) =>
           api.levels.getByOriginal(level.original, {
-            data: { project: 'slug,name,original,primaryConcepts,i18n' }
+            data: { project: 'slug,name,original,primaryConcepts,i18n,scoreTypes' }
           }).then (data) =>
             levelToUpdate = _.find(@levels, {original: data.original})
-            Vue.set(levelToUpdate, 'primaryConcepts', data.primaryConcepts)
+            Vue.set(levelToUpdate, 'primaryConcept', _.first(data.primaryConcepts))
             Vue.set(levelToUpdate, 'i18n', data.i18n)
-        )
+            if data.scoreTypes
+              Vue.set(levelToUpdate, 'scoreTypes', data.scoreTypes)
+              # pick the first score, not currently showing multiple
+              scoreType = _.first(data.scoreTypes)
+              if _.isObject(scoreType)
+                Vue.set(levelToUpdate, 'scoreType', scoreType.type)
+        ))
       )
       api.users.getLevelSessions({ userID: me.id }).then((@levelSessions) =>)
     ]).then =>
@@ -66,7 +75,15 @@ StudentAssessmentsComponent = Vue.extend
   methods:
     createSessionMap: ->
       # Map level original to levelSession
-      _.reduce(@levelSessions, (map, session) ->
+      _.reduce(@levelSessions, (map, session) =>
+        # Take the raw top score data and chosen score type and
+        # pull the pertinent data out.
+        level = _.find(@levels, {original: session.level.original})
+        topScores = LevelSession.getTopScores({level, session})
+        if level
+          score = _.find(topScores, {type: level.scoreType})
+          session.topScore = score?.score
+          session.thresholdAchieved = score?.thresholdAchieved
         map[session.level.original] = session
         return map
       , {})

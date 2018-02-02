@@ -44,7 +44,7 @@
     .col-xs-2
       div(v-if="playUrl")
         a.play-level-btn.btn.btn-navy-alt(v-if="complete", :href="playUrl")
-          | {{ $t('courses.play_again') }}
+          | {{ $t('play.replay') }}
         a.play-level-btn.btn.btn-forest(v-else-if="started", :href="playUrl")
           | {{ $t('courses.keep_trying') }}
         a.play-level-btn.btn.btn-navy(v-else, :href="playUrl")

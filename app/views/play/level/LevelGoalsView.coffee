@@ -162,7 +162,6 @@ module.exports = class LevelGoalsView extends CocoView
   # Score display
 
   shouldShowScores: ->
-#    return false # Disable scores for now (WIP)
     shouldShow = @level.get('assessment') in ['open-ended'] and @hasMainScore
     if shouldShow isnt @showingScores
       @showingScores = shouldShow

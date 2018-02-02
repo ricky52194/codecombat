@@ -20,9 +20,9 @@
           =" "
           | {{ $t('teacher.success') }}
           span(v-if="scoreString")
-            =" "
-            | - {{ scoreString }}
             img.threshold-icon(:src="scoreIconUrl" v-if="thresholdAchieved")
+            =" "
+            | ({{ scoreString }})
           br
         span(v-else-if="started")
           span.glyphicon.glyphicon-question-sign.in-progress-symbol.text-gold

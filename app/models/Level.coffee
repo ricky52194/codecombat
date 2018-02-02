@@ -300,9 +300,6 @@ module.exports = class Level extends CocoModel
         console.error "Problem with template and solution comments for", @get('slug'), e
     sampleCode
 
-  thresholdForScore: ({type, score}) ->
-    return Level.thresholdForScore({level: @toJSON(), type, score})
-    
   @thresholdForScore: ({level, type, score}) ->
     return null unless levelScoreTypes = level.scoreTypes
     return null unless levelScoreType = _.find(levelScoreTypes, {type})

@@ -16,6 +16,7 @@ Campaigns = require 'collections/Campaigns'
 Classroom = require 'models/Classroom'
 Classrooms = require 'collections/Classrooms'
 Levels = require 'collections/Levels'
+LevelSession = require 'models/LevelSession'
 LevelSessions = require 'collections/LevelSessions'
 User = require 'models/User'
 Users = require 'collections/Users'
@@ -701,6 +702,6 @@ module.exports = class TeacherClassView extends RootView
     scoreType = _.first(level.get('scoreTypes'))
     if _.isObject(scoreType)
       scoreType = scoreType.type
-    topScores = session.getTopScores(level)
+    topScores = LevelSession.getTopScores({level: level.toJSON(), session: session.toJSON()}) 
     topScore = _.find(topScores, {type: scoreType})
     return topScore

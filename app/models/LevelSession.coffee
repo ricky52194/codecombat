@@ -95,11 +95,9 @@ module.exports = class LevelSession extends CocoModel
         newTopScores.push oldTopScore
     state.topScores = newTopScores
     @set 'state', state
-    Backbone.Mediator.publish 'level:top-scores-updated', scores: @getTopScores level
+    scores = LevelSession.getTopScores({level: level.toJSON(), session: @toJSON()})
+    Backbone.Mediator.publish('level:top-scores-updated', {scores})
 
-  getTopScores: (level=undefined) ->
-    return LevelSession.getTopScores({level: level?.toJSON(), session: @toJSON()})
-    
   @getTopScores: ({level, session}) ->
     Level = require('models/Level')
     scores = (_.clone(score) for score in session.state?.topScores ? [])
